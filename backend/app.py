@@ -90,9 +90,12 @@ class Review(db.Model):
 def init_db():
     with app.app_context():
         db.create_all()
-        # Default admin
-        if not Admin.query.first():
+        # Default admin - always ensure admin exists
+        admin = Admin.query.filter_by(username='admin').first()
+        if not admin:
             db.session.add(Admin(username='admin', password='admin123'))
+        else:
+            admin.password = 'admin123'
         # Default settings
         if not Settings.query.first():
             db.session.add(Settings())
