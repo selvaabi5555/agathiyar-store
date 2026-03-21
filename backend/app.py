@@ -18,7 +18,8 @@ app = Flask(__name__, static_folder='uploads', static_url_path='/uploads')
 CORS(app, supports_credentials=True)
 
 # Config
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///agathiyar.db'
+import os
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///agathiyar.db').replace('postgres://', 'postgresql://')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'agathiyar-store-secret-2024'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
@@ -602,6 +603,12 @@ def db_view(table):
         return jsonify({'table': table, 'count': len(data), 'rows': data})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    with app.app_context():
+    db.create_all()
+    if not Admin.query.first():
+        db.session.add(Admin(username='admin', password='admin123'))
+        db.session.commit()
+    
 
 if __name__ == '__main__':
     init_db()
