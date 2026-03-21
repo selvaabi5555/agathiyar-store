@@ -603,12 +603,13 @@ def db_view(table):
         return jsonify({'table': table, 'count': len(data), 'rows': data})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    with app.app_context():
+
+# Auto create admin on startup
+with app.app_context():
     db.create_all()
     if not Admin.query.first():
         db.session.add(Admin(username='admin', password='admin123'))
         db.session.commit()
-    
 
 if __name__ == '__main__':
     init_db()
